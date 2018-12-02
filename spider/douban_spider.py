@@ -5,12 +5,6 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 from fake_useragent import UserAgent
 
-# proxys=[{'https': '124.243.226.18:8888'}, {'https': '101.132.142.124:8080'},
-#        {'https': '101.27.22.144:61234'}, {'https': '123.190.76.50:53281'},
-#        {'http': '118.187.58.34:53281'}, {'https': '139.129.207.72:808'},
-#        {'http': '61.135.217.7:80'}, {'http': '58.53.128.83:3128'},
-#        {'https': '113.108.242.36:47713'}, {'https': '182.111.64.7:41766'}]
-
 ua =UserAgent()
 header={"User-Agent":ua.random}
 html=rq.get("https://book.douban.com/tag/?view=type&icn=index-sorttags-all",headers=header)

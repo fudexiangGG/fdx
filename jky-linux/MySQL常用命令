@@ -1,0 +1,37 @@
+
+grant all privileges on *.*  to root@"172.17.%.%" identified by "mMwklKZyyIEv6iq63404";
+update user set Grant_priv='Y' where User='root' and Host='172.17.%.%';
+flush privileges;
+
+# 修改表字符集
+ALTER TABLE ps CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# For each database:
+ALTER DATABASE ttd CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+
+
+create database maintenance_preview8 DEFAULT CHARACTER SET utf8mb4  DEFAULT COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE `test2` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+
+create database xxl_job DEFAULT CHARACTER SET utf8mb4  DEFAULT COLLATE utf8mb4_unicode_ci;
+grant all privileges on xxl_job.*  to xxl_job@"localhost" identified by "v3jZHcERaifHpdk6MUQh";
+flush privileges;
+
+mysqldump -uchuangongedu_com -p'sme7375' --add-drop-table chuangongedu_com >./chuangongedu_com.sql
+mysql -uchuangongedu_com -p'sme7375' chuangongedu_com <./chuangongedu_com.sql
+
+
+
+vim /etc/my.cnf 加入skip-grant-tables
+/etc/init.d/mysqld restart
+mysql
+use mysql
+update user set password=password("xei9Iinaiqueivai") where user="root";
+flush privileges;
+exit
+/etc/init.d/mysqld restart
+
+
+CHANGE MASTER TO MASTER_HOST='61.139.76.160',  MASTER_USER='repl', MASTER_PASSWORD='DJWnoH9wuSQxRD0XGArK', MASTER_PORT=3306,   MASTER_AUTO_POSITION = 1;

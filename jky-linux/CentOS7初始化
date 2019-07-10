@@ -1,0 +1,116 @@
+#!/bin/sh
+
+
+
+#关闭控制台电源保护，让显示器一直开着。vnc登录后不会黑屏
+#echo setterm -blank 0 -store>>/etc/rc.local  这个方法无效
+
+#禁止关闭显示器 archlinux wiki 提及的方法
+echo -ne "\033[9;0]" >> /etc/issue
+# 重启，cat /sys/module/kernel/parameters/consoleblank 为空表示生效
+
+yum install -y iproute rsync epel-release vim-enhanced wget curl screen lbzip2
+
+cat << 'EOF' > /etc/yum.repos.d/epel.repo
+[epel]
+name=Extra Packages for Enterprise Linux 7 - $basearch
+baseurl=http://mirrors.aliyun.com/epel/7/$basearch
+#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=$basearch
+failovermethod=priority
+enabled=1
+gpgcheck=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+ 
+[epel-debuginfo]
+name=Extra Packages for Enterprise Linux 7 - $basearch - Debug
+baseurl=http://mirrors.aliyun.com/epel/7/$basearch/debug
+#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-debug-7&arch=$basearch
+failovermethod=priority
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+gpgcheck=0
+ 
+[epel-source]
+name=Extra Packages for Enterprise Linux 7 - $basearch - Source
+baseurl=http://mirrors.aliyun.com/epel/7/SRPMS
+#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-source-7&arch=$basearch
+failovermethod=priority
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+gpgcheck=0
+EOF
+
+
+#rpm -ivh http://mirrors.hustunique.com/epel/7/x86_64/e/epel-release-7-2.noarch.rpm
+
+#查看主机名
+hostnamectl status
+
+#修改主机名
+hostnamectl  set-hostname 主机名
+
+#删除ipv6的localhost配置
+#::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 主机名" > /etc/hosts
+
+rm -f /root/anaconda-ks.cfg  /root/install.log  /root/install.log.syslog
+
+#禁用SELINUX，必须重启才能生效
+echo SELINUX=disabled>/etc/selinux/config
+echo SELINUXTYPE=targeted>>/etc/selinux/config
+
+#如果你想使用自己的 iptables 静态防火墙规则, 那么请安装 iptables-services 并且禁用 firewalld ，启用 iptables
+yum install -y iptables-services
+systemctl  stop  firewalld
+systemctl mask firewalld.service
+systemctl enable iptables.service
+iptables -F
+iptables-save >/etc/sysconfig/iptables
+
+
+systemctl mask NetworkManager
+
+
+#最大可以打开的文件
+echo "*               soft   nofile            65535" >> /etc/security/limits.conf
+echo "*               hard   nofile            65535" >> /etc/security/limits.conf
+
+# ssh登录时，登录ip被会反向解析为域名，导致ssh登录缓慢
+sed -i "s/#UseDNS yes/UseDNS no/" /etc/ssh/sshd_config
+sed -i "s/GSSAPIAuthentication yes/GSSAPIAuthentication no/" /etc/ssh/sshd_config
+sed -i "s/GSSAPICleanupCredentials yes/GSSAPICleanupCredentials no/" /etc/ssh/sshd_config
+sed -i "s/#MaxAuthTries 6/MaxAuthTries 10/" /etc/ssh/sshd_config
+# server每隔30秒发送一次请求给client，然后client响应，从而保持连接
+sed -i "s/#ClientAliveInterval 0/ClientAliveInterval 30/" /etc/ssh/sshd_config
+# server发出请求后，客户端没有响应得次数达到3，就自动断开连接，正常情况下，client不会不响应
+sed -i "s/#ClientAliveCountMax 3/ClientAliveCountMax 10/" /etc/ssh/sshd_config
+
+#支持gbk文件显示
+echo "set fencs=utf-8,gbk" >> /etc/vimrc
+
+#设定系统时区
+yes|cp /usr/share/zoneinfo/Asia/Chongqing /etc/localtime
+#同步时间服务器
+yum install -y chrony
+systemctl enable chronyd
+systemctl start chronyd
+
+#如果是x86_64系统，排除32位包
+echo "exclude=*.i386 *.i586 *.i686" >> /etc/yum.conf
+
+
+#disable IPv6
+echo "net.ipv6.conf.all.disable_ipv6 = 1" >>  /etc/sysctl.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 1" >>  /etc/sysctl.conf
+
+
+firewall-cmd --zone=public --add-port=28529/tcp --permanent
+firewall-cmd --reload
+
+cat /etc/sysconfig/network-scripts/ifcfg-ens3 
+DEVICE=ens3
+BOOTPROTO=dhcp
+NAME=ens3
+ONBOOT=yes
+TYPE=Ethernet
+

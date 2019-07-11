@@ -1,20 +1,20 @@
 rpm -ivh https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
 yum install -y mysql-community-server
-mysqld --initialize
+mysqld --initialize  数据库初始化,随机产生密码
 chown -R mysql /var/lib/mysql
 
 /usr/sbin/mysqld --basedir=/usr --datadir=/var/lib/mysql --plugin-dir=/usr/lib64/mysql/plugin --user=mysql --log-error=/var/log/mysqld.log --pid-file=/var/run/mysqld/mysqld.pid --socket=/var/lib/mysql/mysql.sock
 
-# 临时密码
+#临时密码
 grep 'A temporary password' /var/log/mysqld.log
 
 2017-09-27T17:17:05.661484Z 1 [Note] A temporary password is generated for root@localhost: Jg5)B,f3VTye
 
-mysqladmin -uroot -p'Jg5)B,f3VTye' password "f6OfXdHhqyJgrbiUVUJK"
+mysqladmin -uroot -p'mKr!4tln(mAN' password "N1GQhufsyGmiz7nClIXA"
 
-mysql_config_editor set --login-path=local --host=localhost --user=root --password
+mysql_config_editor set --login-path=local --host=localhost --user=root --password  
 
-mysql --login-path=local
+mysql --login-path=local   数据库 无密码登录方式
 
 
 grant all privileges on *.*  to root@"172.17.%.%" identified by "f6OfXdHhqyJgrbiUVUJK";

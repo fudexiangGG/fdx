@@ -1,11 +1,32 @@
 mkdir /root/install
 cd /root/install
 wget -c http://php.net/get/php-7.3.7.tar.bz2/from/this/mirror -O php-7.3.7.tar.bz2
+wget -c https://libzip.org/download/libzip-1.1.2.tar.gz
+wget -c https://www.gnupg.org/ftp/gcrypt/gnutls/v3.5/gnutls-3.5.19.tar.xz
+wget -c https://ftp.gnu.org/gnu/nettle/nettle-3.4.tar.gz
+
+tar xf nettle-3.4.tar.gz
+cd nettle-3.4/
+export PKG_CONFIG_PATH=/usr/local/nettle-3.4/lib64/pkgconfig/
+./configure --prefix=/usr/local/nettle-3.4
+make && make install
+cd ..
+
+tar xf gnutls-3.5.19.tar.xz
+cd gnutls-3.5.19/
+./configure --prefix=/usr/local/gnutls-3.5.19
+make && make install
+cd ..
+
+tar xf libzip-1.1.2.tar.gz
+cd libzip-1.1.2/
+export PKG_CONFIG_PATH=/usr/local/libzip-1.1.2/lib/pkgconfig/
+./configure --prefix=/usr/local/libzip-1.1.2
+make && make install
 
 yum install -y gcc zlib-devel freetype-devel gd-devel libmcrypt-devel curl-devel libtool libxml2-devel gdbm-devel libjpeg-devel libpng-devel curl-devel libc-client libtidy pcre-devel openssl-devel net-snmp net-snmp-devel net-snmp-utils net-snmp-libs libevent-devel mhash-devel patch mysql-devel libzip-devel systemd-devel
 
 cd /root/install
-rm -rf php-7.3.7
 tar xf php-7.3.7.tar.bz2
 cd php-7.3.7
 
@@ -38,6 +59,8 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 EOF
+
+cp /usr/local/php-7.3.7/etc/php-fpm.d/www.conf.default /usr/local/php-7.3.7/etc/php-fpm.d/www.conf
 
 systemctl enable php7-fpm
 systemctl start php7-fpm

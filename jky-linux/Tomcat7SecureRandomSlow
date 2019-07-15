@@ -1,0 +1,15 @@
+Aug 23 21:28:28 192168100009 server[10588]: Aug 23, 2017 9:28:28 PM org.apache.catalina.util.SessionIdGeneratorBase createSecureRandom
+Aug 23 21:28:28 192168100009 server[10588]: INFO: Creation of SecureRandom instance for session ID generation using [SHA1PRNG] took [370,071] milliseconds.
+
+
+The secure random calls may be blocking as there is not enough entropy to feed them in /dev/random.
+
+If you have the line
+
+securerandom.source=file:/dev/random
+
+in /jre/lib/security/java.security, changing this to urandom may improve things (although this is probably already the default).
+
+Alternatively there are some suggestions on how to feed the pool here
+
+https://security.stackexchange.com/questions/89/feeding-dev-random-entropy-pool

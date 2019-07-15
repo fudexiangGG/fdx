@@ -1,0 +1,10 @@
+yum install -y git rpmdevtools
+mkdir /root/download
+cd /root/download
+git clone https://github.com/gdelprete/rpm-tomcat8.git
+cd rpm-tomcat8
+sed -i 's/8.0.24/8.5.16/g' tomcat8.spec
+sed -i 's/wget http/wget -c http/g' make_rpm.sh
+sed -i '/publish-rpm /d'  make_rpm.sh
+
+`/root/download/rpm-tomcat8/rpmbuild/RPMS/noarch/tomcat8-8.5.16-1.noarch.rpm` 为编译后的RPM包

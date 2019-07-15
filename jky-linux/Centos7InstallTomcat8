@@ -1,0 +1,39 @@
+yum install -y git rpmdevtools
+
+mkdir /root/download
+
+cd /root/download
+git clone https://github.com/gdelprete/rpm-tomcat8.git
+
+cd rpm-tomcat8
+
+sed -i 's/8.0.24/8.5.16/g' tomcat8.spec
+sed -i 's/wget http/wget -c http/g' make_rpm.sh
+sed -i '/publish-rpm /d'  make_rpm.sh
+./make_rpm.sh
+
+`/root/download/rpm-tomcat8/rpmbuild/RPMS/noarch/tomcat8-8.5.16-1.noarch.rpm` 为编译后的RPM包
+
+yum install java-1.8.0-openjdk  -y
+yum install java-1.8.0-openjdk-devel -y
+
+java -version
+
+
+useradd tomcat --shell /bin/false
+
+cd /usr/local/tomcat-9.0.22/
+chgrp -R tomcat *
+chmod g+rwx conf
+chmod g+rwx conf
+chown -R tomcat webapps/ work/ temp/ logs/
+chmod +x bin/*.sh
+
+tomcat8 start
+
+如果显示404 可能由于webapps下面没有内容
+配置server.xml
+<Host name="localhost"  appBase="webapps"
+        unpackWARs="true" autoDeploy="true">
+    <Context path="" docBase="/user/share/tomcat8/webapps" reloadable="true"/>
+</Host>
